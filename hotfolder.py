@@ -6,6 +6,7 @@ import time
 # NOTES
 # recursive dir vs static folder.
 # check for a specific version of python
+# convert copy and delete to move
 
 class Hotfolder(object):
     
@@ -26,28 +27,25 @@ class Hotfolder(object):
 
   def print_configuration(self):
     print "Hotfolder configuration:"
-    print "Source: " + str(source_path)
-    print "Destination: " + str(dest_path)
-    print "Stable cycles: " + str(cycles)
-    print "Wait between cycles: " + str(wait) + " seconds"
+    print "Source: " + str(self._source_path)
+    print "Destination: " + str(self._dest_path)
+    print "Stable cycles: " + str(self._cycles)
+    print "Wait between cycles: " + str(self._wait) + " seconds"
     print "System Platform: " + sys.platform + " - " + sys.version
-    print "Hotfolder name: " + str(label)
+    print "Hotfolder name: " + str(self._name)
     print "Delete source: " + str(self._delete_source)
     print 20*"*" 
 
   def validate_configuration(self):
-    # Check file paths
     if self._source_path == self._dest_path:
       print "Configuration error: The source and destination can't be the same."
       exit(0)
     if (not os.path.exists(self._source_path) or not os.path.isdir(self._source_path)):
-      print not os.path.exists(self._source_path)
       print "Configuration error: The source directory is not valid."
       exit(0)
     if (not os.path.exists(self._dest_path) or not os.path.isdir(self._dest_path)):
       print "Configuration error: The destination directory is not valid."
       exit(1)
-    print "\"%s\"" % (self._source_path)
     if (self._source_path == "" or self._dest_path == ""):
       print "Configuration error: The paths are invalid"
       exit(0)
@@ -113,15 +111,3 @@ if __name__ == '__main__':
     test.process_continuous()
   except (KeyboardInterrupt, SystemExit):
     print "\nApplication terminated"
-
-
-
-
-
-
-
-
-
-
-
-
