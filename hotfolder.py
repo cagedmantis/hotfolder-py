@@ -1,16 +1,18 @@
 import os.path
+import sys
 import shutil
 import time
 
 class Hotfolder(object):
     
   def __init__(self, source_path, dest_path, cycles, wait, os, label):
-    print "Starting hotfoler - " + label + "...."
+    print 20*"*"
+    print "Starting hotfolder - " + label + "...."
     self._source_path = source_path
     self._dest_path = dest_path
     self._cycles = cycles
     self._wait = wait
-    self._os = os
+    self._os = sys.platform
     self._file_hash = {}
     self._delete_source = False
     self._name = label
@@ -18,14 +20,25 @@ class Hotfolder(object):
     # Check all conditions on startup.
     # recursive dir vs static folder.
     # make it run via cli
+    # check that source and dest are diffrent
+    # Print initial configuration
+    # check for a specific version of python
+    print "Hotfolder configuration:"
+    print "Source: " + str(source_path)
+    print "Destination: " + str(dest_path)
+    print "Stable cycles: " + str(cycles)
+    print "Wait between cycles: " + str(wait) + " seconds"
+    print "System Platform: " + sys.platform + " - " + sys.version
+    print "Hotfolder name: " + str(label)
+    print "Delete source: " + str(self._delete_source)
+    print 20*"*"
     print "Initialization complete."
 
   def set_delete_source(self, val):
     self._delete_source = val
 
-  # Remove foo
   def scan_fs(self):
-    os.path.walk(self._source_path, self.load_files, "foo")
+    os.path.walk(self._source_path, self.load_files, "")
         
   def load_files(self, arg, dir, files):
     for file in files:
@@ -71,4 +84,27 @@ class Hotfolder(object):
         print "Adding " + file + " to hash with size: " + str(size)
         self._file_hash[file] = [size]
         return False
+
+
+
+src = ""
+dst = ""
+
+try:
+  test = Hotfolder(src, dst, 3, 5, "linux", "Test Hotfolder")
+  test.set_delete_source(True)
+  test.process_continuous()
+except (KeyboardInterrupt, SystemExit):
+  print "\nApplication terminated via keyboard"
+
+
+
+
+
+
+
+
+
+
+
 
