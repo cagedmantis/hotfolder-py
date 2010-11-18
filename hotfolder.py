@@ -1,4 +1,5 @@
 import os.path
+import os
 import sys
 import shutil
 import time
@@ -7,6 +8,8 @@ import time
 # recursive dir vs static folder.
 # check for a specific version of python
 # convert copy and delete to move
+# add logging
+# add a cli interpreter class?
 
 class Hotfolder(object):
     
@@ -20,6 +23,10 @@ class Hotfolder(object):
     self._os = sys.platform
     self._file_hash = {}
     self._delete_source = False
+    self._scan_tree = False
+    self._scan_folder = True
+    self._dest_tree = False
+    self._dest_folder = True
     self._name = label
     self.print_configuration()
     self.validate_configuration()
@@ -36,6 +43,25 @@ class Hotfolder(object):
     print "Delete source: " + str(self._delete_source)
     print 20*"*" 
 
+  def set_delete_source(self, val):
+    self._delete_source = val
+
+  def set_scan_tree(self, val):
+    self._scan_tree = val
+    self._scan_folder = not val
+
+  def set_scan_folder(self, val):
+    self._scan_tree = not val
+    self._scan_folder = val
+
+  def set_destination_tree(self, val):
+    self._dest_tree = val
+    self._dest_folder = not val
+
+  def set_destination_folder(self, val):
+    self._dest_tree = not val
+    self._dest_folder = val
+
   def validate_configuration(self):
     if self._source_path == self._dest_path:
       print "Configuration error: The source and destination can't be the same."
@@ -50,18 +76,30 @@ class Hotfolder(object):
       print "Configuration error: The paths are invalid"
       exit(0)
 
-  def set_delete_source(self, val):
-    self._delete_source = val
-
   def scan_fs(self):
-    os.path.walk(self._source_path, self.load_files, "")
-        
+    if self._scan_tree:
+      os.path.walk(self._source_path, self.load_files, "")
+    else:
+      entries = os.listdir(self._source_path)
+      for entry in entries:
+        print entry
+        if os.path.isfile(os.path.join(self._source_path, entry)):
+          if self.is_stable(os.path.join(self._source_path, entry)):
+            self.copy_file(os.path.join(self._source_path, entry), os.path.join(self._dest_path, entry))
+            del self._file_hash[os.path.join(self._source_path, entry)]
+            
   def load_files(self, arg, dir, files):
-    for file in files:
-      if self.is_stable(os.path.join(dir, file)):
-        des_dir = dir.replace(self._source_path, self._dest_path)
-        self.copy_file( os.path.join(dir, file), os.path.join(des_dir, file) )
-        del self._file_hash[ os.path.join(dir, file) ]
+    if self._dest_tree:
+      for file in files:
+        if self.is_stable(os.path.join(dir, file)):
+          des_dir = dir.replace(self._source_path, self._dest_path)
+          self.copy_file( os.path.join(dir, file), os.path.join(des_dir, file) )
+          del self._file_hash[ os.path.join(dir, file) ]
+    else:
+      for file in files:
+        if self.is_stable(os.path.join(dir, file)):
+          self.copy_file( os.path.join(dir, file), os.path.join(self._dest_path, file) )
+          del self._file_hash[ os.path.join(dir, file) ]      
 
   def process_cycle(self):
     self.scan_fs()
@@ -106,8 +144,15 @@ dst = ""
 
 if __name__ == '__main__':
   try:
-    test = Hotfolder(src, dst, 3, 5, "Test Hotfolder")
+    test = Hotfolder(src, dst, 2, 5, "Test Hotfolder")
     test.set_delete_source(True)
+    test.set_scan_tree(True)
+    test.set_destination_folder(True)
     test.process_continuous()
   except (KeyboardInterrupt, SystemExit):
     print "\nApplication terminated"
+
+
+
+
+
