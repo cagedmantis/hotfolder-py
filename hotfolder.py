@@ -139,20 +139,3 @@ class Hotfolder(object):
         self._file_hash[file] = [size]
         return False
 
-src = ""
-dst = ""
-
-if __name__ == '__main__':
-  try:
-    test = Hotfolder(src, dst, 2, 5, "Test Hotfolder")
-    test.set_delete_source(True)
-    test.set_scan_tree(True)
-    test.set_destination_folder(True)
-    test.process_continuous()
-  except (KeyboardInterrupt, SystemExit):
-    print "\nApplication terminated"
-
-
-
-
-
